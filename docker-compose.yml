@@ -1,0 +1,77 @@
+version: '3.6'
+services:
+  accounts-db:
+    image: mysql:latest
+    container_name: accounts-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=accounts
+      - MYSQL_USER=farfocle
+      - MYSQL_PASSWORD=farfoclle
+    ports:
+      - 33066:3306
+    restart: always
+    volumes:
+      - accounts-data:/var/lib/mysql
+  #      - /mnt/414054776F940E4C/ServiceStore:/var/lib/mysql
+
+  accounts-service:
+    build:
+      context: ./accounts-service
+      dockerfile: Dockerfile
+    container_name: accounts-service
+    depends_on:
+      - accounts-db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://accounts-db:3306/accounts
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    ports:
+    - 8081:8081
+
+  quiz-db:
+    image: mysql:latest
+    container_name: quiz-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=quiz
+      - MYSQL_USER=farfocle
+      - MYSQL_PASSWORD=farfoclle
+    ports:
+      - 33067:3306
+    restart: always
+    volumes:
+      - quiz-data:/var/lib/mysql
+
+  quiz-service:
+    build:
+      context: ./quiz-service
+      dockerfile: Dockerfile
+    container_name: quiz-service
+    depends_on:
+      - quiz-db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://quiz-db:3306/quiz
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    ports:
+      - 8082:8082
+
+  gateway-api:
+    build:
+      context: ./gateway-uczacz
+      dockerfile: Dockerfile
+    container_name: gateway-api
+    depends_on:
+      - accounts-service
+      - quiz-service
+    ports:
+      - 8080:8080
+    environment:
+      ZUUL_ROUTES_ACCOUNTS_URL: http://accounts-service:8081
+      ZUUL_ROUTES_QUIZ_URL: http://quiz-service:8082
+
+volumes:
+  accounts-data:
+  quiz-data:
+#    /mnt/414054776F940E4C/ServiceStore
