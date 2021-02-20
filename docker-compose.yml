@@ -13,7 +13,6 @@ services:
     restart: always
     volumes:
       - accounts-data:/var/lib/mysql
-  #      - /mnt/414054776F940E4C/ServiceStore:/var/lib/mysql
 
   accounts-service:
     build:
